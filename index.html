@@ -282,7 +282,7 @@ const FIREBASE_CONFIG={
   messagingSenderId:"423475411233",
   appId:"1:423475411233:web:9598b4c90c835661c12660"
 };
-const GEMINI_MODEL="gemini-3.8-flash";
+const GEMINI_MODELS=["gemini-3.8-flash","gemini-flash-latest","gemini-2.5-flash","gemini-2.0-flash"];
 const WORKER_URL="";
 /* ========================================================== */
 const parseLoose=text=>{try{return JSON.parse(text)}catch(e){}
@@ -290,23 +290,34 @@ const parseLoose=text=>{try{return JSON.parse(text)}catch(e){}
 let claudeSample=null;
 if(FIREBASE_CONFIG){
   const FB="https://www.gstatic.com/firebasejs/12.1.0/";
-  let model=null;
+  let ai=null,okModel=null;
   claudeSample={json:async(prompt,{signal}={})=>{
+    let lastErr=null;
     try{
-      if(!model){
+      if(!ai){
         const {initializeApp}=await import(FB+"firebase-app.js");
-        const {getAI,getGenerativeModel,GoogleAIBackend}=await import(FB+"firebase-ai.js");
-        const ai=getAI(initializeApp(FIREBASE_CONFIG),{backend:new GoogleAIBackend()});
-        model=getGenerativeModel(ai,{model:GEMINI_MODEL,generationConfig:{responseMimeType:"application/json",temperature:0.4}});
+        const {getAI,GoogleAIBackend}=await import(FB+"firebase-ai.js");
+        ai=getAI(initializeApp(FIREBASE_CONFIG),{backend:new GoogleAIBackend()});
       }
-      const res=await model.generateContent(prompt+"\n\nRespondé solo con el JSON, sin texto antes ni después.");
-      if(signal&&signal.aborted) throw {code:"cancelled"};
-      return parseLoose(res.response.text());
-    }catch(e){
-      if(e&&e.code&&["cancelled","invalid_json"].includes(e.code)) throw e;
-      console.error(e);
-      throw {code:/429|quota|RESOURCE_EXHAUSTED/i.test(String(e&&e.message))?"rate_limited":"upstream_error"};
+    }catch(e){console.error(e);throw {code:"upstream_error",detail:"No cargó Firebase: "+String(e&&e.message||e).slice(0,160)}}
+    const {getGenerativeModel}=await import(FB+"firebase-ai.js");
+    const list=okModel?[okModel]:GEMINI_MODELS;
+    for(const name of list){
+      try{
+        const model=getGenerativeModel(ai,{model:name,generationConfig:{responseMimeType:"application/json",temperature:0.4}});
+        const res=await model.generateContent(prompt+"\n\nRespondé solo con el JSON, sin texto antes ni después.");
+        if(signal&&signal.aborted) throw {code:"cancelled"};
+        okModel=name;
+        return parseLoose(res.response.text());
+      }catch(e){
+        if(e&&(e.code==="cancelled"||e.code==="invalid_json")) throw e;
+        console.error(name,e);lastErr=e;
+        const m=String(e&&e.message||e);
+        if(!/404|not found|not supported|NOT_FOUND|is not available/i.test(m)) break; /* solo seguimos probando si el modelo no existe */
+      }
     }
+    const m=String(lastErr&&lastErr.message||lastErr);
+    throw {code:/429|quota|RESOURCE_EXHAUSTED/i.test(m)?"rate_limited":"upstream_error",detail:m.slice(0,220)};
   }};
 }else if(WORKER_URL){
   claudeSample={json:async(prompt,{signal}={})=>{
@@ -510,11 +521,11 @@ Respondé SOLO con un JSON así:
     st.lessons[id]={cards,quiz};save();gen[id]={status:"idle"};toast("¡Listo! La teoría está armada.");
   }catch(e){
     const c=e&&e.code;
-    gen[id]=c==="cancelled"?{status:"idle"}:{status:"error",msg:
+    gen[id]=c==="cancelled"?{status:"idle"}:{status:"error",msg:(
       c==="not_granted"||c==="sampling_disabled"?"No se pudo conectar para armar la teoría.":
       c==="rate_limited"?"Se pidieron muchas cosas seguidas. Probá de nuevo en un rato.":
       c==="invalid_json"?"La respuesta salió desordenada. Tocá de nuevo para reintentar.":
-      "No se pudo armar ahora. Probá de nuevo en un ratito."};
+      "No se pudo armar ahora. Probá de nuevo en un ratito.")+(e&&e.detail?" — Detalle: "+e.detail:"")};
     if(c==="not_granted"||c==="sampling_disabled") claudeSample=null;
   }
   render();
