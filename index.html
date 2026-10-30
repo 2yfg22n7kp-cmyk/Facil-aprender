@@ -1,0 +1,655 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="App de estudio para secundaria pensada para TDAH, dislexia y disgrafía.">
+<meta name="theme-color" content="#1F6F63">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231F6F63'/%3E%3Cpath d='M9 17l5 5 9-11' fill='none' stroke='%23F2B33D' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Paso a Paso</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+/* Layout: una columna tipo app de bolsillo; arriba "lo que hago AHORA", abajo navegación fija de 3 pestañas grandes */
+:root{
+  --bg:#EEF3F1;          /* fondo verde-gris suave, sin blanco que encandile */
+  --surface:#FBFCFA;
+  --ink:#1D2B2A;
+  --muted:#556664;
+  --line:#D3DEDA;
+  --accent:#1F6F63;      /* verde petróleo: calma, foco */
+  --accent-ink:#FFFFFF;
+  --accent-soft:#D6EBE5;
+  --sun:#F2B33D;         /* marcador de "ahora" */
+  --sun-soft:#FCEFD3;
+  --done:#3F8A4F;
+  --warn:#B4532A;
+  --warn-soft:#F7E2D7;
+  --font:"Lexend","Atkinson Hyperlegible",system-ui,sans-serif;
+  --scale:1;
+  --ls:0.01em;
+  --lh:1.55;
+  --ws:0.04em;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#151D1C;--surface:#1E2928;--ink:#E7EFEC;--muted:#A3B5B1;--line:#33423F;
+  --accent:#5FBFAE;--accent-ink:#0F1C1A;--accent-soft:#24413C;--sun:#F2B33D;--sun-soft:#3B3220;
+  --done:#7CC48A;--warn:#F0946A;--warn-soft:#45291E;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#151D1C;--surface:#1E2928;--ink:#E7EFEC;--muted:#A3B5B1;--line:#33423F;
+  --accent:#5FBFAE;--accent-ink:#0F1C1A;--accent-soft:#24413C;--sun:#F2B33D;--sun-soft:#3B3220;
+  --done:#7CC48A;--warn:#F0946A;--warn-soft:#45291E;color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:calc(17px * var(--scale));
+  line-height:var(--lh);letter-spacing:var(--ls);word-spacing:var(--ws);}
+.wrap{max-width:560px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 120px;display:flex;flex-direction:column;gap:22px}
+h1,h2,h3{margin:0;line-height:1.25;text-wrap:balance;font-weight:700}
+h1{font-size:1.6em}
+h2{font-size:1.2em}
+p{margin:0}
+button{font:inherit;letter-spacing:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.hello small{display:block;color:var(--muted);font-size:.85em}
+.iconbtn{border:2px solid var(--line);background:var(--surface);border-radius:14px;min-width:48px;min-height:48px;
+  display:grid;place-items:center;font-size:1em}
+
+/* Tarjeta AHORA */
+.now{background:var(--surface);border:3px solid var(--sun);border-radius:22px;padding:22px;display:flex;flex-direction:column;gap:16px}
+.now .tag{align-self:flex-start;background:var(--sun);color:#2A1E05;font-weight:700;border-radius:999px;padding:4px 14px;font-size:.85em;letter-spacing:.06em;text-transform:uppercase}
+.now .step{font-size:1.45em;font-weight:600;line-height:1.3}
+.meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;color:var(--muted);font-size:.9em}
+.subj{display:inline-flex;align-items:center;gap:6px;font-weight:600;color:var(--ink);border-radius:10px;padding:3px 10px;border:2px solid currentColor}
+.subj b{display:inline-grid;place-items:center;width:1.5em;height:1.5em;border-radius:6px;color:#fff;font-size:.8em}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.big{min-height:58px;border-radius:16px;border:none;font-weight:700;font-size:1.05em;padding:10px 14px}
+.primary{background:var(--accent);color:var(--accent-ink)}
+.ghost{background:var(--accent-soft);color:var(--ink)}
+.full{grid-column:1/-1}
+.small{background:none;border:none;color:var(--accent);font-weight:600;text-decoration:underline;text-underline-offset:3px;padding:6px 0;min-height:44px}
+
+/* timer */
+.timer{display:flex;align-items:center;gap:18px;background:var(--accent-soft);border-radius:18px;padding:14px 16px}
+.ring{width:84px;height:84px;flex:none}
+.ring circle{fill:none;stroke-width:9}
+.ring .bgc{stroke:var(--line)}
+.ring .fg{stroke:var(--accent);stroke-linecap:round;transition:stroke-dashoffset .9s linear;transform:rotate(-90deg);transform-origin:50% 50%}
+.ring text{fill:var(--ink);font-family:var(--font);font-weight:700;font-size:20px;font-variant-numeric:tabular-nums}
+.timer .tbtns{display:flex;flex-wrap:wrap;gap:8px}
+.pill{border:2px solid var(--accent);background:var(--surface);border-radius:999px;padding:6px 14px;min-height:44px;font-weight:600}
+.pill[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+
+/* listas */
+.list{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;list-style:none}
+.row{display:flex;align-items:center;gap:12px;background:var(--surface);border:2px solid var(--line);border-radius:16px;padding:12px 14px;min-height:64px}
+.row .txt{flex:1;min-width:0}
+.row .txt .s{font-weight:600}
+.check{flex:none;width:44px;height:44px;border-radius:12px;border:3px solid var(--accent);background:var(--surface);display:grid;place-items:center;font-size:1.2em;font-weight:700;color:var(--accent-ink)}
+.row.isdone{opacity:.6}
+.row.isdone .check{background:var(--done);border-color:var(--done)}
+.row.isdone .s{text-decoration:line-through}
+.late{color:var(--warn);font-weight:600}
+
+.progress{display:flex;flex-direction:column;gap:8px}
+.bar{height:16px;border-radius:999px;background:var(--line);overflow:hidden}
+.bar span{display:block;height:100%;background:var(--done);border-radius:999px;transition:width .4s}
+.stars{font-size:.95em;color:var(--muted)}
+
+/* semana */
+.day{display:flex;flex-direction:column;gap:8px}
+.day h3{font-size:1em;color:var(--muted);text-transform:capitalize}
+.day.today h3{color:var(--accent)}
+.deadline{display:flex;align-items:center;gap:12px;border-radius:16px;padding:12px 14px;background:var(--warn-soft);border:2px solid var(--warn);font-weight:600}
+.deadline .count{margin-left:auto;font-variant-numeric:tabular-nums;white-space:nowrap}
+.empty{color:var(--muted);font-size:.9em;padding:4px 2px}
+
+/* items */
+.item{background:var(--surface);border:2px solid var(--line);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.item .head{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+.kind{font-size:.8em;font-weight:700;text-transform:uppercase;letter-spacing:.08em;border-radius:8px;padding:2px 10px;background:var(--accent-soft)}
+
+/* formulario agregar */
+.form{display:flex;flex-direction:column;gap:22px}
+.q{display:flex;flex-direction:column;gap:10px}
+.q label,.q .lbl{font-weight:700;font-size:1.05em}
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{border:2px solid var(--line);background:var(--surface);border-radius:14px;padding:10px 14px;min-height:52px;font-weight:600;display:inline-flex;align-items:center;gap:8px}
+.chip[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 2px var(--accent)}
+input[type=date],input[type=text]{font:inherit;letter-spacing:inherit;border:2px solid var(--line);background:var(--surface);color:var(--ink);border-radius:14px;padding:12px 14px;min-height:54px;width:100%}
+.stepper{display:flex;align-items:center;gap:14px}
+.stepper button{width:54px;height:54px;border-radius:14px;border:2px solid var(--accent);background:var(--surface);font-size:1.4em;font-weight:700}
+.stepper output{font-size:1.5em;font-weight:700;min-width:2ch;text-align:center;font-variant-numeric:tabular-nums}
+.hint{color:var(--muted);font-size:.88em}
+.preview{background:var(--accent-soft);border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.preview ol{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:4px}
+
+/* ajustes */
+.sheet{background:var(--surface);border:2px solid var(--line);border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:18px}
+
+/* nav */
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:2px solid var(--line);
+  padding:8px max(12px,env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px))}
+nav .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+nav button{border:none;background:none;border-radius:14px;min-height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:.72em;letter-spacing:0;word-spacing:0;font-weight:600;color:var(--muted)}
+nav button svg{width:26px;height:26px}
+nav button[aria-current="page"]{background:var(--accent-soft);color:var(--ink)}
+
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);
+  padding:12px 20px;border-radius:14px;font-weight:600;z-index:20;max-width:calc(100% - 32px);text-align:center}
+.confetti{animation:pop .5s ease}
+@keyframes pop{0%{transform:scale(.9)}60%{transform:scale(1.04)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+.note{font-size:.82em;color:var(--muted);text-align:center}
+
+/* aprender */
+.card{background:var(--surface);border:2px solid var(--line);border-radius:22px;padding:22px;display:flex;flex-direction:column;gap:16px}
+.card h2{font-size:1.35em}
+.count{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:.88em;font-variant-numeric:tabular-nums}
+.count .bar{flex:1;height:10px}
+.exs{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;list-style:none}
+.ex{background:var(--bg);border-radius:14px;padding:12px 14px;font-size:1.05em;line-height:1.5;min-width:0;overflow-wrap:anywhere}
+.ex .from{color:var(--muted)}
+.ex .arrow{display:block;color:var(--accent);font-weight:700;line-height:1;margin:4px 0}
+.ex.inline .arrow{display:inline;margin:0 .4em}
+.hl{background:var(--sun-soft);border-bottom:3px solid var(--sun);font-weight:700;border-radius:4px;padding:0 3px}
+.opt{display:block;width:100%;text-align:left;border:2px solid var(--line);background:var(--surface);border-radius:16px;padding:14px 16px;min-height:58px;font-weight:600}
+.opt.ok{border-color:var(--done);box-shadow:inset 0 0 0 2px var(--done)}
+.opt.bad{border-color:var(--warn);box-shadow:inset 0 0 0 2px var(--warn);opacity:.85}
+.feedback{border-radius:14px;padding:12px 14px;font-weight:500}
+.feedback.ok{background:var(--accent-soft)}
+.feedback.bad{background:var(--warn-soft)}
+.qstem{font-size:1.25em;font-weight:600;line-height:1.4}
+.backlink{align-self:flex-start}
+.genbox{display:flex;flex-direction:column;gap:10px}
+.thinking{color:var(--muted);font-style:italic}
+</style>
+
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<nav aria-label="Secciones"><div class="in" id="nav"></div></nav>
+<div class="toast" id="toast" hidden role="status"></div>
+
+<script>
+const SUBJECTS=[
+ {k:"mat",n:"Matemática",c:"#2D6CB5",a:"M"},{k:"len",n:"Lengua",c:"#B5452D",a:"L"},
+ {k:"his",n:"Historia",c:"#8A5A1F",a:"H"},{k:"geo",n:"Geografía",c:"#3C8A3F",a:"G"},
+ {k:"bio",n:"Biología",c:"#2E8A78",a:"B"},{k:"fis",n:"Física",c:"#6B4CB0",a:"F"},
+ {k:"qui",n:"Química",c:"#B03C78",a:"Q"},{k:"ing",n:"Inglés",c:"#C27A12",a:"I"},
+ {k:"civ",n:"Ciudadanía",c:"#4E6A85",a:"C"},{k:"art",n:"Arte",c:"#A8467D",a:"A"},
+ {k:"otr",n:"Otra",c:"#5E6B6A",a:"•"}];
+const S=k=>SUBJECTS.find(s=>s.k===k)||SUBJECTS[10];
+const QUICK_TOPICS={ing:["Reported speech","Past simple","Present perfect","Conditionals","Passive voice","Comparatives"]};
+const DAY=86400000;
+const iso=d=>{const x=new Date(d);x.setMinutes(x.getMinutes()-x.getTimezoneOffset());return x.toISOString().slice(0,10)};
+const today=()=>iso(new Date());
+const addDays=(s,n)=>{const d=new Date(s+"T12:00:00");d.setDate(d.getDate()+n);return iso(d)};
+const diff=(a,b)=>Math.round((new Date(b+"T12:00:00")-new Date(a+"T12:00:00"))/DAY);
+const nextWeekday=(wd)=>{const d=new Date();let n=(wd-d.getDay()+7)%7||7;return addDays(today(),n)};
+const fmt=s=>new Date(s+"T12:00:00").toLocaleDateString("es-AR",{weekday:"long",day:"numeric",month:"long"});
+const fmtShort=s=>new Date(s+"T12:00:00").toLocaleDateString("es-AR",{weekday:"short",day:"numeric"});
+const uid=()=>Math.random().toString(36).slice(2,9);
+
+/* ---------- teoría incluida: Reported speech ---------- */
+const LESSON_RS={title:"Reported speech · KET (A2)",en:true,cards:[
+ {t:"¿Qué es el reported speech?",x:"Sirve para contar lo que dijo otra persona. En direct speech copiás las palabras exactas, entre comillas. En reported speech lo contás vos, sin comillas.",
+  e:['Tom: "I am tired." → Tom said (that) he [[was]] tired.']},
+ {t:"¿Said o told?",x:"Usá said cuando no aparece a quién le hablaron. Usá told cuando sí aparece la persona: told me, told him, told us. Nunca digas said me.",
+  e:['She [[said]] she was hungry.','She [[told me]] she was hungry.','✗ She said me… → ✓ She [[told me]]…']},
+ {t:"Regla 1: el verbo va un paso atrás",x:"Cuando contás con said o told, el verbo de la frase pasa al pasado. Es la regla más importante.",
+  e:['am / is → [[was]]','are → [[were]]','like / likes → [[liked]]','have / has → [[had]]','am playing → [[was playing]]']},
+ {t:"Regla 1: will y can",x:"Will y can también cambian. Son muy comunes en el examen.",
+  e:['will → [[would]]','can → [[could]]',"can't → [[couldn't]]","don't like → [[didn't like]]"]},
+ {t:"La regla 1 en oraciones",x:"Mirá cómo cambia solo el verbo resaltado.",
+  e:['"I play football." → He said he [[played]] football.','"We are studying." → They said they [[were studying]].','"I will call you." → He said he [[would]] call me.','"I can\'t swim." → She said she [[couldn\'t]] swim.']},
+ {t:"Regla 2: cambian las personas",x:"Pensá quién habla y de quién se habla. I pasa a he o she. My pasa a his o her. We pasa a they. Our pasa a their.",
+  e:['"[[I]] love [[my]] dog." → Ana said [[she]] loved [[her]] dog.','"[[We]] are late." → They said [[they]] were late.']},
+ {t:"Regla 3: cambian algunas palabras de tiempo y lugar",x:"Para KET alcanza con aprender estas.",
+  e:['now → [[then]]','today → [[that day]]','tomorrow → [[the next day]]','yesterday → [[the day before]]','here → [[there]]','this → [[that]]']},
+ {t:"Todo junto",x:"En una misma oración pueden cambiar el verbo, la persona y el tiempo.",
+  e:['"[[I am]] busy [[today]]." → Luca said [[he was]] busy [[that day]].','"[[We will]] go [[tomorrow]]." → They told me [[they would]] go [[the next day]].']},
+ {t:"Checklist para el examen",x:"En el escrito, seguí estos pasos con cada oración. Podés copiarlos en el margen de la hoja.",list:true,
+  e:['1. ¿Aparece la persona? Entonces told. Si no, said.','2. Sacá las comillas. That es opcional.','3. Pasá el verbo al pasado: is pasa a was, will a would, can a could.','4. Cambiá las personas: I pasa a he o she, my a his o her.','5. Cambiá tiempo y lugar: today pasa a that day.']}],
+ quiz:[
+ {q:'"I am hungry." → Tom said he ___ hungry.',o:["is","was","were"],a:1,w:"Am pasa a was."},
+ {q:"¿Cuál está bien?",o:["She said me she was tired.","She told me she was tired.","She told she was tired."],a:1,w:"Told va con la persona (me). Said nunca lleva me."},
+ {q:'"I will help you." → He said he ___ help me.',o:["will","would","can"],a:1,w:"Will pasa a would."},
+ {q:'"We are watching TV." → They said they ___ TV.',o:["are watching","were watching","watch"],a:1,w:"Are watching pasa a were watching."},
+ {q:'"I can swim." → Lucía said she ___ swim.',o:["could","can","must"],a:0,w:"Can pasa a could."},
+ {q:'"I like pizza." → Sam said he ___ pizza.',o:["like","likes","liked"],a:2,w:"El presente pasa a pasado: like a liked."},
+ {q:'"My brother is here." → Pablo said ___ brother was ___.',o:["my / here","his / there","his / here"],a:1,w:"My pasa a his y here pasa a there."},
+ {q:'"I am busy today." → Mia said she was busy ___.',o:["today","that day","tomorrow"],a:1,w:"Today pasa a that day."},
+ {q:'"We have a cat." → They said ___ a cat.',o:["we have","they had","they have"],a:1,w:"We pasa a they y have pasa a had."},
+ {q:'"I can\'t come." → Leo told ___ he couldn\'t come.',o:["me","to me","said me"],a:0,w:"Told va directo con la persona: told me."}]};
+const builtinLesson=item=>item.subject==="ing"&&/report/i.test(item.title||"")?LESSON_RS:null;
+const lessonOf=item=>item&&(st.lessons[item.id]||builtinLesson(item));
+
+/* ---------- plan automático ---------- */
+function planSteps(item){
+  const t=item.topics;const out=[];const L=!!builtinLesson(item);
+  if(item.type==="examen"){
+    out.push({x:"Juntar carpeta, apuntes y libro",m:10});
+    for(let i=1;i<=t;i++){out.push({x:L||item.subject==="ing"?`Ver la teoría (parte ${i}) en Aprender`:`Leer el tema ${i} y marcar 3 ideas clave`,m:20,th:1});out.push({x:`Hacer un mapa o dibujo del tema ${i}`,m:15});}
+    out.push({x:"Hacer la práctica de Aprender",m:20,q:1});
+    out.push({x:item.subject==="ing"?"Pasar 5 oraciones de la carpeta, despacio":"Practicar ejercicios de la carpeta",m:25});
+    out.push({x:"Explicar todo en voz alta (como si enseñaras)",m:15});
+    out.push({x:"Repaso corto y dormir bien",m:15,th:1});
+  }else{
+    out.push({x:"Leer la consigna y subrayar qué piden",m:10});
+    out.push({x:"Hacer la lista de partes del trabajo",m:10});
+    for(let i=1;i<=t;i++) out.push({x:`Buscar información de la parte ${i}`,m:20});
+    for(let i=1;i<=t;i++) out.push({x:`Escribir o armar la parte ${i}`,m:25});
+    out.push({x:"Revisar con la lista de la consigna",m:15});
+    out.push({x:"Pasar en limpio y dejar listo para entregar",m:15});
+  }
+  const start=today(); let days=Math.max(1,diff(start,item.date));
+  return out.map((s,i)=>({id:uid(),itemId:item.id,text:s.x,mins:s.m,done:false,th:s.th||0,q:s.q||0,
+    date:addDays(start,Math.min(days-1,Math.floor(i*days/out.length)))}));
+}
+
+/* ---------- estado ---------- */
+const KEY="pasoapaso.v2";
+let st=load();
+function sample(){
+  const t=today();
+  const items=[
+   {id:uid(),type:"examen",subject:"ing",title:"Reported speech",detail:"Examen escrito",date:nextWeekday(2),topics:3},
+   {id:uid(),type:"examen",subject:"mat",title:"Ecuaciones",date:addDays(t,8),topics:2},
+   {id:uid(),type:"tp",subject:"his",title:"Revolución de Mayo",date:addDays(t,10),topics:2}];
+  let steps=[];items.forEach(i=>steps=steps.concat(planSteps(i)));
+  return {items,steps,lessons:{},name:"",sample:true,prefs:{scale:1,spacing:false,font:"lexend",focus:15,year:"2º",eng:"KET (A2)"}};
+}
+function load(){try{const r=localStorage.getItem(KEY);if(r){const s=JSON.parse(r);s.lessons=s.lessons||{};s.prefs.year=s.prefs.year||"2º";s.prefs.eng=s.prefs.eng||"KET (A2)";return s}}catch(e){}return sample()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
+
+let view="hoy", timer={left:0,total:0,run:false,h:null}, addDraft=null, showAllLater=false, confirmDel=null;
+let learn=null; /* {itemId, mode:'cards'|'quiz'|'end', i, score, picked} */
+let gen={}; /* itemId -> {status, msg, ctl} */
+/* ===================== CONFIGURACIÓN =====================
+   Opción Firebase: pegá acá el objeto firebaseConfig que te da la consola de Firebase.
+   Ejemplo: const FIREBASE_CONFIG={apiKey:"...",authDomain:"...",projectId:"...",appId:"..."};
+   Opción Apps Script: dejá FIREBASE_CONFIG en null y pegá la URL /exec en WORKER_URL. */
+const FIREBASE_CONFIG={
+  apiKey:"AIzaSyDz2hwmHj_9GoGyfnNjzKOcA6oFMtGYS2Q",
+  authDomain:"aprender-facil-aa84f.firebaseapp.com",
+  projectId:"aprender-facil-aa84f",
+  storageBucket:"aprender-facil-aa84f.firebasestorage.app",
+  messagingSenderId:"423475411233",
+  appId:"1:423475411233:web:9598b4c90c835661c12660"
+};
+const GEMINI_MODEL="gemini-3.8-flash";
+const WORKER_URL="";
+/* ========================================================== */
+const parseLoose=text=>{try{return JSON.parse(text)}catch(e){}
+  const m=String(text).match(/\{[\s\S]*\}/);try{return JSON.parse(m[0])}catch(e){throw {code:"invalid_json"}}};
+let claudeSample=null;
+if(FIREBASE_CONFIG){
+  const FB="https://www.gstatic.com/firebasejs/12.1.0/";
+  let model=null;
+  claudeSample={json:async(prompt,{signal}={})=>{
+    try{
+      if(!model){
+        const {initializeApp}=await import(FB+"firebase-app.js");
+        const {getAI,getGenerativeModel,GoogleAIBackend}=await import(FB+"firebase-ai.js");
+        const ai=getAI(initializeApp(FIREBASE_CONFIG),{backend:new GoogleAIBackend()});
+        model=getGenerativeModel(ai,{model:GEMINI_MODEL,generationConfig:{responseMimeType:"application/json",temperature:0.4}});
+      }
+      const res=await model.generateContent(prompt+"\n\nRespondé solo con el JSON, sin texto antes ni después.");
+      if(signal&&signal.aborted) throw {code:"cancelled"};
+      return parseLoose(res.response.text());
+    }catch(e){
+      if(e&&e.code&&["cancelled","invalid_json"].includes(e.code)) throw e;
+      console.error(e);
+      throw {code:/429|quota|RESOURCE_EXHAUSTED/i.test(String(e&&e.message))?"rate_limited":"upstream_error"};
+    }
+  }};
+}else if(WORKER_URL){
+  claudeSample={json:async(prompt,{signal}={})=>{
+    let r;
+    try{r=await fetch(WORKER_URL,{method:"POST",body:JSON.stringify({prompt}),signal})}
+    catch(e){throw {code:e&&e.name==="AbortError"?"cancelled":"upstream_error"}}
+    if(!r.ok) throw {code:"upstream_error"};
+    let d;try{d=await r.json()}catch(e){throw {code:"upstream_error"}}
+    if(d.error) throw {code:d.error==="limite"||d.status===429?"rate_limited":"upstream_error"};
+    return parseLoose(d.text);
+  }};
+}else{
+  try{window.claude?.use?.("sample").then(f=>{claudeSample=f;if(view==="aprender")render()}).catch(()=>{})}catch(e){}
+}
+
+function applyPrefs(){
+  const r=document.documentElement.style,p=st.prefs;
+  r.setProperty("--scale",p.scale);
+  r.setProperty("--ls",p.spacing?"0.06em":"0.01em");
+  r.setProperty("--ws",p.spacing?"0.16em":"0.04em");
+  r.setProperty("--lh",p.spacing?"1.85":"1.55");
+  r.setProperty("--font",p.font==="atk"?'"Atkinson Hyperlegible","Lexend",system-ui,sans-serif':'"Lexend","Atkinson Hyperlegible",system-ui,sans-serif');
+}
+
+/* ---------- utilidades UI ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const plain=s=>String(s).replace(/\[\[|\]\]/g,"").replace(/→/g,". ").replace(/✗|✓/g,"");
+const hl=s=>esc(s).replace(/\[\[(.+?)\]\]/g,'<mark class="hl">$1</mark>');
+function subjBadge(k){const s=S(k);return `<span class="subj" style="color:${s.c}"><b style="background:${s.c}">${s.a}</b><span style="color:var(--ink)">${s.n}</span></span>`}
+function toast(m){const t=$("#toast");t.textContent=m;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>t.hidden=true,2600)}
+function speak(parts){try{speechSynthesis.cancel();(Array.isArray(parts)?parts:[[parts,"es-AR"]]).forEach(([t,l])=>{const u=new SpeechSynthesisUtterance(plain(t));u.lang=l;u.rate=.88;speechSynthesis.speak(u)})}catch(e){toast("Este dispositivo no puede leer en voz alta")}}
+const itemOf=s=>st.items.find(i=>i.id===s.itemId)||{};
+const ICON={
+ hoy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>',
+ semana:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>',
+ aprender:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5.5c3-1.5 6-1.5 9 .5 3-2 6-2 9-.5v13c-3-1.5-6-1.5-9 .5-3-2-6-2-9-.5z"/><path d="M12 6v13"/></svg>',
+ agregar:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><path d="M12 7.5v9M7.5 12h9"/></svg>',
+ ajustes:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2.2"/><circle cx="10" cy="17" r="2.2"/></svg>'};
+const SPK='<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>';
+
+/* ---------- HOY ---------- */
+function vHoy(){
+  const t=today();
+  const pending=st.steps.filter(s=>!s.done&&s.date<=t).sort((a,b)=>a.date.localeCompare(b.date));
+  const doneToday=st.steps.filter(s=>s.done&&s.doneOn===t);
+  const total=pending.length+doneToday.length;
+  const pct=total?Math.round(doneToday.length/total*100):0;
+  const now=pending[0];
+  let h=`<div class="top"><div class="hello"><small>${esc(fmt(t))}</small><h1>${st.name?"Hola, "+esc(st.name):"Hoy"}</h1></div></div>`;
+  if(st.sample) h+=`<p class="hint">Estás viendo un ejemplo. En <b>Ajustes</b> podés borrarlo y empezar con lo tuyo.</p>`;
+  h+=`<div class="progress"><div class="bar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><span style="width:${pct}%"></span></div>
+      <p class="stars">${doneToday.length} de ${total} pasos hechos hoy${pct===100&&total?" · ¡Terminaste por hoy! 🎉":""}</p></div>`;
+  if(now){
+    const it=itemOf(now);const late=now.date<t;
+    const studyBtn=(now.th||now.q)?`<button class="big ghost full" data-act="study" data-id="${it.id}" data-mode="${now.q?"quiz":"cards"}">📖 ${now.q?"Abrir la práctica":"Abrir la teoría"}</button>`:"";
+    h+=`<section class="now confetti" aria-labelledby="nowstep">
+      <span class="tag">Ahora</span>
+      <p class="step" id="nowstep">${esc(now.text)}</p>
+      <div class="meta">${subjBadge(it.subject)}<span>${it.type==="tp"?"TP":"Examen"}: ${esc(it.title)}</span><span>· ${now.mins} min</span>${late?'<span class="late">· quedó de antes</span>':""}</div>
+      ${timerHTML()}
+      <div class="actions">
+        ${studyBtn}
+        <button class="big primary full" data-act="done" data-id="${now.id}">✓ Listo, lo hice</button>
+        <button class="big ghost" data-act="speak" data-t="${esc(now.text)}" aria-label="Escuchar el paso">${SPK} Escuchar</button>
+        <button class="big ghost" data-act="skip" data-id="${now.id}">Pasar a mañana</button>
+      </div></section>`;
+    const later=pending.slice(1);
+    if(later.length){
+      const vis=showAllLater?later:later.slice(0,2);
+      h+=`<section class="q"><h2>Después</h2><ul class="list">${vis.map(rowStep).join("")}</ul>
+        ${later.length>2?`<button class="small" data-act="more">${showAllLater?"Mostrar menos":"Ver los otros "+(later.length-2)}</button>`:""}</section>`;
+    }
+  }else{
+    h+=`<section class="now"><span class="tag">Hoy</span><p class="step">No te queda nada para hoy. ¡Bien!</p>
+      <p class="hint">Si querés adelantar, mirá la <b>Semana</b> o repasá en <b>Aprender</b>.</p></section>`;
+  }
+  if(doneToday.length) h+=`<section class="q"><h2>Ya hecho hoy</h2><ul class="list">${doneToday.map(rowStep).join("")}</ul></section>`;
+  return h;
+}
+function rowStep(s){
+  const it=itemOf(s),sb=S(it.subject);
+  return `<li class="row ${s.done?"isdone":""}"><button class="check" data-act="${s.done?"undo":"done"}" data-id="${s.id}" aria-label="${s.done?"Desmarcar":"Marcar hecho"}: ${esc(s.text)}">${s.done?"✓":""}</button>
+  <div class="txt"><div class="s">${esc(s.text)}</div><div class="meta"><span style="color:${sb.c};font-weight:700">${sb.n}</span><span>· ${s.mins} min</span></div></div>
+  <button class="iconbtn" data-act="speak" data-t="${esc(s.text)}" aria-label="Escuchar">${SPK}</button></li>`;
+}
+function timerHTML(){
+  const p=st.prefs.focus,C=2*Math.PI*36;
+  const left=timer.total?timer.left:p*60,total=timer.total||p*60;
+  const off=C*(1-left/total),mm=Math.floor(left/60),ss=String(left%60).padStart(2,"0");
+  return `<div class="timer"><svg class="ring" viewBox="0 0 84 84" role="img" aria-label="Quedan ${mm} minutos"><circle class="bgc" cx="42" cy="42" r="36"/><circle class="fg" cx="42" cy="42" r="36" stroke-dasharray="${C}" stroke-dashoffset="${off}"/><text x="42" y="49" text-anchor="middle">${mm}:${ss}</text></svg>
+   <div class="tbtns"><button class="pill" data-act="timer">${timer.run?"Pausa":timer.total?"Seguir":"Empezar"}</button>
+   ${[10,15,25].map(m=>`<button class="pill" data-act="focus" data-m="${m}" aria-pressed="${p===m}">${m}'</button>`).join("")}</div></div>`;
+}
+
+/* ---------- SEMANA ---------- */
+function vSemana(){
+  const t=today();let h=`<h1>Semana</h1><p class="hint">Lo que viene en los próximos 14 días. Las fechas importantes aparecen en naranja.</p>`;
+  for(let i=0;i<14;i++){
+    const d=addDays(t,i);const steps=st.steps.filter(s=>s.date===d);const dl=st.items.filter(x=>x.date===d);
+    if(!steps.length&&!dl.length&&i>0) continue;
+    h+=`<section class="day ${i===0?"today":""}"><h3>${i===0?"Hoy · ":i===1?"Mañana · ":""}${fmt(d)}</h3>`;
+    dl.forEach(x=>h+=`<div class="deadline">${subjBadge(x.subject)}<span>${x.type==="tp"?"Entrega TP":"EXAMEN"}</span></div>`);
+    h+=steps.length?`<ul class="list">${steps.map(rowStep).join("")}</ul>`:`<p class="empty">Día libre.</p>`;
+    h+=`</section>`;
+  }
+  h+=`<h2>Mis exámenes y trabajos</h2>`;
+  [...st.items].sort((a,b)=>a.date.localeCompare(b.date)).forEach(x=>{
+    const all=st.steps.filter(s=>s.itemId===x.id),dn=all.filter(s=>s.done).length,f=diff(t,x.date);
+    h+=`<div class="item"><div class="head">${subjBadge(x.subject)}<span class="kind">${x.type==="tp"?"Trabajo práctico":"Examen"}</span></div>
+      <div><b>${esc(x.title)}</b><div class="meta">${fmtShort(x.date)} · ${f<0?"ya pasó":f===0?"¡es hoy!":f===1?"falta 1 día":"faltan "+f+" días"}</div></div>
+      <div class="bar"><span style="width:${all.length?dn/all.length*100:0}%"></span></div><p class="stars">${dn} de ${all.length} pasos</p>
+      ${confirmDel===x.id?`<div class="actions"><button class="big primary" data-act="delyes" data-id="${x.id}">Sí, borrar</button><button class="big ghost" data-act="delno">No</button></div>`:`<button class="small" data-act="del" data-id="${x.id}">Borrar</button>`}</div>`;
+  });
+  if(!st.items.length) h+=`<p class="empty">Todavía no cargaste nada.</p>`;
+  return h;
+}
+
+/* ---------- APRENDER ---------- */
+function vAprender(){
+  if(learn){const it=st.items.find(i=>i.id===learn.itemId);const L=lessonOf(it);if(it&&L)return vLesson(it,L);learn=null}
+  let h=`<h1>Aprender</h1><p class="hint">La teoría de cada examen, en tarjetas cortas. Después hay una práctica donde solo tocás la respuesta: no hace falta escribir.</p>`;
+  const items=[...st.items].filter(x=>x.date>=today()).sort((a,b)=>a.date.localeCompare(b.date));
+  if(!items.length) return h+`<p class="empty">No hay exámenes próximos. Cargá uno en <b>Agregar</b>.</p>`;
+  items.forEach(x=>{
+    const L=lessonOf(x),g=gen[x.id]||{},f=diff(today(),x.date);
+    h+=`<div class="item"><div class="head">${subjBadge(x.subject)}<span class="kind">${x.type==="tp"?"TP":"Examen"} · ${f===0?"hoy":f===1?"mañana":"en "+f+" días"}</span></div>
+      <h2>${esc(x.title)}</h2>${x.subject==="ing"?`<p class="hint">Nivel ${esc(st.prefs.eng)}</p>`:""}`;
+    if(L){
+      h+=`<p class="hint">${L.cards.length} tarjetas · ${L.quiz.length} preguntas de práctica${x.bestScore!=null?` · Tu mejor resultado: ${x.bestScore} de ${L.quiz.length}`:""}</p>
+        <div class="actions"><button class="big primary" data-act="study" data-id="${x.id}" data-mode="cards">📖 Teoría</button>
+        <button class="big ghost" data-act="study" data-id="${x.id}" data-mode="quiz">✋ Practicar</button></div>`;
+      if(st.lessons[x.id]) h+=`<p class="hint">Armado automáticamente. Comparalo con tu carpeta: si algo no coincide, vale lo que dio el profe.</p>`;
+    }else if(g.status==="loading"){
+      h+=`<p class="thinking" role="status">${esc(g.msg||"Estoy armando las tarjetas… puede tardar un minuto.")}</p><button class="big ghost" data-act="genstop" data-id="${x.id}">Frenar</button>`;
+    }else if(claudeSample){
+      h+=`<div class="genbox"><label class="hint" for="det-${x.id}">¿Qué entra? <i>(opcional: podés copiar lo que dijo el profe)</i></label>
+        <input type="text" id="det-${x.id}" data-detail="${x.id}" maxlength="200" value="${esc(x.detail||"")}" placeholder="Ej: unidad 3, páginas 40 a 52">
+        <button class="big primary" data-act="gen" data-id="${x.id}">✨ Armar la teoría</button>
+        ${g.status==="error"?`<p class="late" role="alert">${esc(g.msg)}</p>`:""}</div>`;
+    }else{
+      h+=`<p class="hint">Todavía no hay teoría cargada para este tema. Usá la carpeta y el libro para este examen.</p>`;
+    }
+    h+=`</div>`;
+  });
+  return h;
+}
+function exampleHTML(e,list){
+  if(list) return `<li class="ex">${hl(e)}</li>`;
+  const parts=e.split(" → ");
+  if(parts.length!==2) return `<li class="ex">${hl(e)}</li>`;
+  const inline=plain(e).length<34;
+  return `<li class="ex ${inline?"inline":""}"><span class="from">${hl(parts[0])}</span><span class="arrow" aria-label="pasa a">${inline?"→":"↓"}</span><span>${hl(parts[1])}</span></li>`;
+}
+function vLesson(it,L){
+  const en=it.subject==="ing";
+  let h=`<button class="small backlink" data-act="lback">← Volver a Aprender</button>`;
+  if(learn.mode==="cards"){
+    const c=L.cards[learn.i],n=L.cards.length;
+    h+=`<div class="count"><span>Tarjeta ${learn.i+1} de ${n}</span><div class="bar"><span style="width:${(learn.i+1)/n*100}%"></span></div></div>
+    <article class="card confetti" aria-live="polite"><div class="meta">${subjBadge(it.subject)}<span>${esc(it.title)}</span></div>
+      <h2>${esc(c.t)}</h2><p>${esc(c.x)}</p>
+      ${c.e&&c.e.length?`<ul class="exs">${c.e.map(e=>exampleHTML(e,c.list)).join("")}</ul>`:""}
+      <button class="big ghost" data-act="readcard">${SPK} Escuchar esta tarjeta</button></article>
+    <div class="actions"><button class="big ghost" data-act="lprev" ${learn.i===0?"disabled style='opacity:.4'":""}>← Anterior</button>
+      ${learn.i<n-1?`<button class="big primary" data-act="lnext">Siguiente →</button>`:`<button class="big primary" data-act="lquiz">✋ Ir a practicar</button>`}</div>`;
+  }else if(learn.mode==="quiz"){
+    const q=L.quiz[learn.i],n=L.quiz.length,p=learn.picked;
+    h+=`<div class="count"><span>Pregunta ${learn.i+1} de ${n} · ${learn.score} bien</span><div class="bar"><span style="width:${(learn.i+(p!=null?1:0))/n*100}%"></span></div></div>
+    <article class="card"><p class="qstem">${hl(q.q)}</p>
+      <button class="big ghost" data-act="readq">${SPK} Escuchar</button>
+      <div class="list">${q.o.map((o,k)=>`<button class="opt ${p!=null&&k===q.a?"ok":""} ${p===k&&k!==q.a?"bad":""}" data-act="pick" data-k="${k}" ${p!=null?"disabled":""}>${p!=null&&k===q.a?"✓ ":p===k?"✗ ":""}${esc(o)}</button>`).join("")}</div>
+      ${p!=null?`<div class="feedback ${p===q.a?"ok":"bad"}" role="status"><b>${p===q.a?"¡Bien!":"Casi."}</b> ${esc(q.w)}</div>`:""}
+    </article>
+    ${p!=null?`<button class="big primary" data-act="qnext">${learn.i<n-1?"Siguiente pregunta →":"Ver resultado"}</button>`:`<button class="small" data-act="lcards">Volver a mirar la teoría</button>`}`;
+  }else{
+    const n=L.quiz.length,s=learn.score;
+    const msg=s===n?"¡Perfecto! Lo tenés.":s>=n*.7?"¡Muy bien! Repasá las que fallaste.":s>=n*.4?"Vas bien. Mirá la teoría otra vez y volvé a probar.":"Está bien equivocarse: así se aprende. Repasá las tarjetas y probá de nuevo.";
+    h+=`<article class="card confetti"><h2>${s} de ${n} bien</h2><div class="bar"><span style="width:${s/n*100}%"></span></div><p>${msg}</p></article>
+    <div class="actions"><button class="big primary" data-act="study" data-id="${it.id}" data-mode="quiz">Practicar otra vez</button>
+    <button class="big ghost" data-act="study" data-id="${it.id}" data-mode="cards">Ver la teoría</button></div>`;
+  }
+  return h;
+}
+async function generate(id){
+  const it=st.items.find(i=>i.id===id);if(!it||!claudeSample)return;
+  const ctl=new AbortController();gen[id]={status:"loading",ctl};render();
+  const en=it.subject==="ing";
+  const prompt=`Armá la teoría para estudiar un ${it.type==="tp"?"trabajo práctico":"examen"} de ${S(it.subject).n}, tema: "${it.title}". Alumno de ${st.prefs.year} año de secundaria en Argentina, con TDAH, dislexia y disgrafía.${it.detail?` Lo que entra según el profesor: "${it.detail}".`:""}
+Reglas de escritura: español rioplatense (vos), frases cortas y simples, una sola idea por tarjeta, sin palabras difíciles sin explicar, nada de párrafos largos. ${en?`Nivel de inglés: ${st.prefs.eng} del Cambridge. Usá solo gramática y vocabulario de ese nivel; no incluyas temas de niveles más altos. Las explicaciones en español y los ejemplos en inglés.`:""}
+Respondé SOLO con un JSON así:
+{"cards":[{"t":"título corto","x":"explicación de 2 o 3 frases (máx 45 palabras)","e":["ejemplo 1","ejemplo 2"]}],"quiz":[{"q":"pregunta corta","o":["opción A","opción B","opción C"],"a":0,"w":"por qué es la correcta, 1 frase"}]}
+- Entre 6 y 10 tarjetas, en orden de lo más básico a lo más difícil. La última tarjeta es un resumen o checklist para el examen.
+- Ejemplos: 1 a 4 por tarjeta, cortos. Si un ejemplo muestra un cambio, usá el formato "antes → después". Marcá la palabra clave con [[doble corchete]].
+- Entre 8 y 10 preguntas de opción múltiple con 3 opciones, una sola correcta ("a" es el índice). Que se respondan tocando, sin escribir.`;
+  try{
+    const r=await claudeSample.json(prompt,{signal:ctl.signal});
+    if(!r||!Array.isArray(r.cards)||!r.cards.length||!Array.isArray(r.quiz)) throw {code:"invalid_json"};
+    const cards=r.cards.slice(0,12).map(c=>({t:String(c.t||""),x:String(c.x||""),e:Array.isArray(c.e)?c.e.map(String).slice(0,6):[]}));
+    const quiz=r.quiz.filter(q=>Array.isArray(q.o)&&q.o.length>1).slice(0,12).map(q=>({q:String(q.q),o:q.o.map(String),a:Math.min(q.o.length-1,Math.max(0,+q.a||0)),w:String(q.w||"")}));
+    st.lessons[id]={cards,quiz};save();gen[id]={status:"idle"};toast("¡Listo! La teoría está armada.");
+  }catch(e){
+    const c=e&&e.code;
+    gen[id]=c==="cancelled"?{status:"idle"}:{status:"error",msg:
+      c==="not_granted"||c==="sampling_disabled"?"No se pudo conectar para armar la teoría.":
+      c==="rate_limited"?"Se pidieron muchas cosas seguidas. Probá de nuevo en un rato.":
+      c==="invalid_json"?"La respuesta salió desordenada. Tocá de nuevo para reintentar.":
+      "No se pudo armar ahora. Probá de nuevo en un ratito."};
+    if(c==="not_granted"||c==="sampling_disabled") claudeSample=null;
+  }
+  render();
+}
+
+/* ---------- AGREGAR ---------- */
+function vAgregar(){
+  const d=addDraft||(addDraft={type:"examen",subject:"",title:"",date:addDays(today(),7),topics:2});
+  const ok=d.subject&&d.date>today();
+  const qt=QUICK_TOPICS[d.subject];
+  let h=`<h1>Agregar</h1><div class="form">
+   <div class="q"><span class="lbl">1. ¿Qué es?</span><div class="chips">
+     <button class="chip" data-act="dtype" data-v="examen" aria-pressed="${d.type==="examen"}">📝 Examen / prueba</button>
+     <button class="chip" data-act="dtype" data-v="tp" aria-pressed="${d.type==="tp"}">📂 Trabajo práctico</button></div></div>
+   <div class="q"><span class="lbl">2. ¿De qué materia?</span><div class="chips">
+     ${SUBJECTS.map(s=>`<button class="chip" data-act="dsubj" data-v="${s.k}" aria-pressed="${d.subject===s.k}"><b style="display:inline-grid;place-items:center;width:1.6em;height:1.6em;border-radius:7px;background:${s.c};color:#fff;font-size:.8em">${s.a}</b>${s.n}</button>`).join("")}</div></div>
+   <div class="q"><label for="ddate">3. ¿Qué día es?</label><input type="date" id="ddate" min="${addDays(today(),1)}" value="${d.date}">
+     <div class="chips">${[3,7,14].map(n=>`<button class="chip" data-act="dquick" data-v="${n}">En ${n===7?"1 semana":n===14?"2 semanas":n+" días"}</button>`).join("")}</div></div>
+   <div class="q"><span class="lbl">4. ¿Cuántos ${d.type==="tp"?"partes tiene":"temas entran"}?</span>
+     <div class="stepper"><button data-act="dtop" data-v="-1" aria-label="Uno menos">−</button><output>${d.topics}</output><button data-act="dtop" data-v="1" aria-label="Uno más">+</button></div>
+     <p class="hint">Si no sabés, dejalo en 2. Se puede cambiar después.</p></div>
+   <div class="q"><label for="dtitle">5. ¿De qué tema?</label>
+     ${qt?`<div class="chips">${qt.map(t=>`<button class="chip" data-act="dtopic" data-v="${t}" aria-pressed="${d.title===t}">${t}</button>`).join("")}</div>`:""}
+     <input type="text" id="dtitle" maxlength="40" placeholder="Ej: Unidad 3" value="${esc(d.title)}" autocomplete="off">
+     <p class="hint">Con el tema, en <b>Aprender</b> podés pedir la teoría.</p></div>`;
+  if(ok){const prev=planSteps({...d,id:"x"});
+    h+=`<div class="preview"><b>Tu plan: ${prev.length} pasos cortos, de ${fmtShort(prev[0].date)} a ${fmtShort(prev[prev.length-1].date)}</b>
+      <ol>${prev.slice(0,4).map(s=>`<li>${esc(s.text)}</li>`).join("")}${prev.length>4?"<li>…y "+(prev.length-4)+" más</li>":""}</ol></div>`;}
+  h+=`<button class="big primary" data-act="dsave" ${ok?"":"disabled style='opacity:.5'"}>${ok?"Armar mi plan":"Elegí materia y fecha"}</button></div>`;
+  return h;
+}
+
+/* ---------- AJUSTES ---------- */
+function vAjustes(){
+  const p=st.prefs;
+  return `<h1>Ajustes</h1><div class="sheet">
+   <div class="q"><label for="nm">Tu nombre</label><input type="text" id="nm" maxlength="20" value="${esc(st.name)}" autocomplete="off"></div>
+   <div class="q"><span class="lbl">¿En qué año estás?</span><div class="chips">
+     ${["1º","2º","3º","4º","5º","6º"].map(y=>`<button class="chip" data-act="pyear" data-v="${y}" aria-pressed="${p.year===y}">${y}</button>`).join("")}</div>
+     <p class="hint">Sirve para que la teoría tenga el nivel justo.</p></div>
+   <div class="q"><span class="lbl">Nivel de inglés</span><div class="chips">
+     ${["Starters/Movers (A1)","KET (A2)","PET (B1)","FCE (B2)"].map(y=>`<button class="chip" data-act="peng" data-v="${y}" aria-pressed="${p.eng===y}">${y}</button>`).join("")}</div></div>
+   <div class="q"><span class="lbl">Tamaño de letra</span><div class="chips">
+     ${[[1,"Normal"],[1.15,"Grande"],[1.3,"Muy grande"]].map(([v,n])=>`<button class="chip" data-act="pscale" data-v="${v}" aria-pressed="${p.scale==v}" style="font-size:${v}em">${n}</button>`).join("")}</div></div>
+   <div class="q"><span class="lbl">Tipo de letra</span><div class="chips">
+     <button class="chip" data-act="pfont" data-v="lexend" aria-pressed="${p.font==="lexend"}" style="font-family:Lexend">Lexend</button>
+     <button class="chip" data-act="pfont" data-v="atk" aria-pressed="${p.font==="atk"}" style="font-family:'Atkinson Hyperlegible'">Atkinson</button></div>
+     <p class="hint">Las dos están hechas para leer más fácil. Elegí la que te resulte más cómoda.</p></div>
+   <div class="q"><span class="lbl">Espacio entre letras y renglones</span><div class="chips">
+     <button class="chip" data-act="pspace" data-v="0" aria-pressed="${!p.spacing}">Normal</button>
+     <button class="chip" data-act="pspace" data-v="1" aria-pressed="${p.spacing}" style="letter-spacing:.08em">Más aire</button></div></div>
+   <div class="q"><span class="lbl">Empezar de cero</span>
+     ${confirmDel==="all"?`<div class="actions"><button class="big primary" data-act="resetyes">Sí, borrar todo</button><button class="big ghost" data-act="delno">No</button></div>`
+      :`<button class="big ghost" data-act="reset">${st.sample?"Borrar el ejemplo":"Borrar todo"}</button>`}</div></div>
+   <p class="note">Tus datos quedan guardados solo en este dispositivo.</p>`;
+}
+
+function render(){
+  applyPrefs();
+  $("#app").innerHTML=({hoy:vHoy,semana:vSemana,aprender:vAprender,agregar:vAgregar,ajustes:vAjustes})[view]();
+  $("#nav").innerHTML=[["hoy","Hoy"],["semana","Semana"],["aprender","Aprender"],["agregar","Agregar"],["ajustes","Ajustes"]]
+    .map(([k,n])=>`<button data-nav="${k}" ${view===k?'aria-current="page"':""}>${ICON[k]}${n}</button>`).join("");
+}
+
+/* ---------- eventos ---------- */
+function tick(){
+  if(!timer.run)return; timer.left--;
+  if(timer.left<=0){timer.run=false;clearInterval(timer.h);timer.left=0;toast("¡Tiempo! Tomate 5 minutos de descanso.");speak("Tiempo. Tomate cinco minutos de descanso.")}
+  if(view==="hoy"){const tm=document.querySelector(".timer");if(tm)tm.outerHTML=timerHTML()}
+}
+function curLesson(){const it=learn&&st.items.find(i=>i.id===learn.itemId);return [it,it&&lessonOf(it)]}
+document.addEventListener("click",e=>{
+  const n=e.target.closest("[data-nav]");if(n){view=n.dataset.nav;confirmDel=null;if(view==="aprender")learn=null;render();window.scrollTo(0,0);return}
+  const b=e.target.closest("[data-act]");if(!b||b.disabled)return;const a=b.dataset.act,id=b.dataset.id;
+  const step=id&&st.steps.find(s=>s.id===id);
+  const top=()=>window.scrollTo(0,0);
+  switch(a){
+    case"done":step.done=true;step.doneOn=today();clearInterval(timer.h);timer={left:0,total:0,run:false,h:null};save();render();
+      toast(["¡Bien ahí!","¡Un paso menos!","¡Genial, seguí así!","¡Eso!"][Math.floor(Math.random()*4)]);break;
+    case"undo":step.done=false;delete step.doneOn;save();render();break;
+    case"skip":step.date=addDays(today(),1);save();render();toast("Lo pasamos a mañana. Está bien.");break;
+    case"speak":speak(b.dataset.t);break;
+    case"more":showAllLater=!showAllLater;render();break;
+    case"timer":
+      if(!timer.total){timer.total=timer.left=st.prefs.focus*60}
+      timer.run=!timer.run;clearInterval(timer.h);if(timer.run)timer.h=setInterval(tick,1000);render();break;
+    case"focus":st.prefs.focus=+b.dataset.m;clearInterval(timer.h);timer={left:0,total:0,run:false};save();render();break;
+    /* aprender */
+    case"study":{const it=st.items.find(i=>i.id===id);view="aprender";
+      learn=lessonOf(it)?{itemId:id,mode:b.dataset.mode,i:0,score:0,picked:null}:null;render();top();break;}
+    case"lback":learn=null;speechSynthesis?.cancel?.();render();top();break;
+    case"lnext":learn.i++;render();top();break;
+    case"lprev":learn.i=Math.max(0,learn.i-1);render();top();break;
+    case"lquiz":learn={...learn,mode:"quiz",i:0,score:0,picked:null};render();top();break;
+    case"lcards":learn={...learn,mode:"cards",i:0};render();top();break;
+    case"readcard":{const [it,L]=curLesson();const c=L.cards[learn.i],lang=it.subject==="ing"?"en-GB":"es-AR";
+      speak([[c.t,"es-AR"],[c.x,"es-AR"],...(c.e||[]).map(x=>[x,c.list?"es-AR":lang])]);break;}
+    case"readq":{const [it,L]=curLesson();const q=L.quiz[learn.i],lang=it.subject==="ing"?"en-GB":"es-AR";
+      speak([[q.q,lang],...q.o.map((o,k)=>[`${["A","B","C","D"][k]||""}. ${o}`,lang])]);break;}
+    case"pick":{const [it,L]=curLesson();const k=+b.dataset.k;learn.picked=k;if(k===L.quiz[learn.i].a)learn.score++;render();break;}
+    case"qnext":{const [it,L]=curLesson();
+      if(learn.i<L.quiz.length-1){learn.i++;learn.picked=null}
+      else{learn.mode="end";it.bestScore=Math.max(it.bestScore??0,learn.score);save()}
+      render();top();break;}
+    case"gen":generate(id);break;
+    case"genstop":gen[id]?.ctl?.abort();break;
+    /* agregar */
+    case"dtype":addDraft.type=b.dataset.v;render();break;
+    case"dsubj":addDraft.subject=b.dataset.v;render();break;
+    case"dtopic":addDraft.title=b.dataset.v;render();break;
+    case"dquick":addDraft.date=addDays(today(),+b.dataset.v);render();break;
+    case"dtop":addDraft.topics=Math.min(8,Math.max(1,addDraft.topics+ +b.dataset.v));render();break;
+    case"dsave":{const it={...addDraft,id:uid()};if(!it.title)it.title=S(it.subject).n;
+      if(st.sample){st.items=[];st.steps=[];st.lessons={};st.sample=false}
+      st.items.push(it);st.steps=st.steps.concat(planSteps(it));addDraft=null;save();view="hoy";render();toast("Plan armado. Empezá por el primer paso.");break;}
+    case"del":confirmDel=id;render();break;
+    case"delno":confirmDel=null;render();break;
+    case"delyes":st.items=st.items.filter(x=>x.id!==id);st.steps=st.steps.filter(s=>s.itemId!==id);delete st.lessons[id];confirmDel=null;save();render();toast("Borrado.");break;
+    case"reset":confirmDel="all";render();break;
+    case"resetyes":st.items=[];st.steps=[];st.lessons={};st.sample=false;confirmDel=null;save();view="agregar";render();break;
+    case"peng":st.prefs.eng=b.dataset.v;save();render();break;
+    case"pyear":st.prefs.year=b.dataset.v;save();render();break;
+    case"pscale":st.prefs.scale=+b.dataset.v;save();render();break;
+    case"pfont":st.prefs.font=b.dataset.v;save();render();break;
+    case"pspace":st.prefs.spacing=b.dataset.v==="1";save();render();break;
+  }
+});
+document.addEventListener("input",e=>{
+  if(e.target.id==="dtitle")addDraft.title=e.target.value;
+  if(e.target.id==="nm"){st.name=e.target.value.trim();save()}
+  if(e.target.dataset.detail){const it=st.items.find(i=>i.id===e.target.dataset.detail);if(it){it.detail=e.target.value;save()}}
+});
+document.addEventListener("change",e=>{if(e.target.id==="ddate"){addDraft.date=e.target.value;render()}});
+render();
+</script>
+
+</body>
+</html>
