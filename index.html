@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="App de estudio para secundaria pensada para TDAH, dislexia y disgrafía.">
+<meta name="description" content="Organizá tus exámenes y trabajos prácticos paso a paso.">
 <meta name="theme-color" content="#1F6F63">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231F6F63'/%3E%3Cpath d='M9 17l5 5 9-11' fill='none' stroke='%23F2B33D' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
@@ -512,7 +512,7 @@ async function generate(id){
   const it=st.items.find(i=>i.id===id);if(!it||!claudeSample)return;
   const ctl=new AbortController();gen[id]={status:"loading",ctl};render();
   const en=it.subject==="ing";
-  const prompt=`Armá la teoría para estudiar un ${it.type==="tp"?"trabajo práctico":"examen"} de ${S(it.subject).n}, tema: "${it.title}". Alumno de ${st.prefs.year} año de secundaria en Argentina, con TDAH, dislexia y disgrafía.${it.detail?` Lo que entra según el profesor: "${it.detail}".`:""}
+  const prompt=`Armá la teoría para estudiar un ${it.type==="tp"?"trabajo práctico":"examen"} de ${S(it.subject).n}, tema: "${it.title}". Alumno de ${st.prefs.year} año de secundaria en Argentina, que necesita textos muy claros, cortos y fáciles de leer.${it.detail?` Lo que entra según el profesor: "${it.detail}".`:""}
 Reglas de escritura: español rioplatense (vos), frases cortas y simples, una sola idea por tarjeta, sin palabras difíciles sin explicar, nada de párrafos largos. ${en?`Nivel de inglés: ${st.prefs.eng} del Cambridge. Usá solo gramática y vocabulario de ese nivel; no incluyas temas de niveles más altos. Las explicaciones en español y los ejemplos en inglés.`:""}
 Respondé SOLO con un JSON así:
 {"cards":[{"t":"título corto","x":"explicación de 2 o 3 frases (máx 45 palabras)","e":["ejemplo 1","ejemplo 2"]}],"quiz":[{"q":"pregunta corta","o":["opción A","opción B","opción C"],"a":0,"w":"por qué es la correcta, 1 frase"}]}
