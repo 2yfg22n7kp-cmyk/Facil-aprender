@@ -282,6 +282,7 @@ const FIREBASE_CONFIG={
   messagingSenderId:"423475411233",
   appId:"1:423475411233:web:9598b4c90c835661c12660"
 };
+const RECAPTCHA_SITE_KEY="6Ld-5wguAAAAAJc8BcCeeK14SbeD1NoSvATiariy"; /* clave de reCAPTCHA Enterprise (la pública) */
 const GEMINI_MODELS=["gemini-3.8-flash","gemini-flash-latest","gemini-2.5-flash","gemini-2.0-flash"];
 const WORKER_URL="";
 /* ========================================================== */
@@ -296,8 +297,13 @@ if(FIREBASE_CONFIG){
     try{
       if(!ai){
         const {initializeApp}=await import(FB+"firebase-app.js");
+        const app=initializeApp(FIREBASE_CONFIG);
+        if(RECAPTCHA_SITE_KEY){
+          const {initializeAppCheck,ReCaptchaEnterpriseProvider}=await import(FB+"firebase-app-check.js");
+          initializeAppCheck(app,{provider:new ReCaptchaEnterpriseProvider(RECAPTCHA_SITE_KEY),isTokenAutoRefreshEnabled:true});
+        }
         const {getAI,GoogleAIBackend}=await import(FB+"firebase-ai.js");
-        ai=getAI(initializeApp(FIREBASE_CONFIG),{backend:new GoogleAIBackend()});
+        ai=getAI(app,{backend:new GoogleAIBackend()});
       }
     }catch(e){console.error(e);throw {code:"upstream_error",detail:"No cargó Firebase: "+String(e&&e.message||e).slice(0,160)}}
     const {getGenerativeModel}=await import(FB+"firebase-ai.js");
